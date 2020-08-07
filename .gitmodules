@@ -4,3 +4,6 @@
 [submodule "nodeRedditDownloader"]
 	path = nodeRedditDownloader
 	url = https://github.com/mediocreeee/nodeRedditDownloader
+[submodule "arch_inst"]
+	path = arch_inst
+	url = https://github.com/mediocreeee/arch_inst.git
