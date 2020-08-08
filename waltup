@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-
 # TODO get abs path of img
+# TODO split into functions
+# TODO setup &2>/dev/null
+
 IMG=$(basename "$1")
 IMGNAME="${IMG%.*}"
 
@@ -65,4 +67,4 @@ telegram-desktop
 echo "Setting wal colors for awesomewm..."
 ~/scripts/awesomewal
 echo "Restarting awesome..."
-echo 'awesome.restart()' | awesomeclient
+echo 'awesome.restart()' | awesome-client
