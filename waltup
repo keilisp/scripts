@@ -19,12 +19,6 @@ wal -i "$1"
 echo "Adding wal theme to awesome autostart..."
 echo "wal -R" >>~/.config/awesome/autostart.sh
 
-# awesome
-echo "Setting wal colors for awesomewm..."
-~/scripts/awesomewal
-echo "Restarting awesome..."
-ecoh 'awesome.restart()' | awesomeclient
-
 # GTK theme
 echo "Checking if oomox is installed..."
 if ! pacman -Qi oomox; then
@@ -60,3 +54,9 @@ echo "Generating theme for telegram..."
 ~/.telegram-palette-gen/telegram-palette-gen --wal
 echo "Openning telegram to apply theme..."
 telegram-desktop
+
+# awesome
+echo "Setting wal colors for awesomewm..."
+~/scripts/awesomewal
+echo "Restarting awesome..."
+echo 'awesome.restart()' | awesomeclient
