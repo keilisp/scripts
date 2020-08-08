@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
+# TODO get abs path of img
 IMG=$(basename "$1")
 IMGNAME="${IMG%.*}"
 
 # set wallpaper
 feh --bg-fill "$1"
-echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
+if ! grep "feh --bg-fill" ~/.config/awesome/autostart.sh; then
+	echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
+fi
+sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
 
 # wal itself
 echo "Checking if pywal is installed..."
@@ -17,7 +21,9 @@ echo "Runnging pywal with $IMGNAME..."
 wal -i "$1"
 # TODO add check for window manager
 echo "Adding wal theme to awesome autostart..."
-echo "wal -R" >>~/.config/awesome/autostart.sh
+if ! grep "wal -R" ~/.config/awesome/autostart.sh; then
+	echo "wal -R" >>~/.config/awesome/autostart.sh
+fi
 
 # GTK theme
 echo "Checking if oomox is installed..."
@@ -38,7 +44,7 @@ if ! pip show pywalfox; then
 	echo "Installing pywalfox..."
 	pip install pywalfox
 fi
-echo "Chmoddinx pywalfox executable..."
+
 sudo chmod +x ~/.local/lib/python3.8/site-packages/pywalfox/bin/main.sh
 echo "Setuping pywalfox..."
 pywalfox setup
