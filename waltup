@@ -1,70 +1,304 @@
 #!/usr/bin/env bash
-# TODO get abs path of img
-# TODO split into functions
-# TODO setup &2>/dev/null
 
 IMG=$(basename "$1")
 IMGNAME="${IMG%.*}"
 
-# set wallpaper
-feh --bg-fill "$1"
-if ! grep "feh --bg-fill" ~/.config/awesome/autostart.sh; then
-	echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
+check_feh_inst() {
+	echo "Checking if feh is installed..."
+	if ! pacman -Qi feh; then
+		read -r -p "Seems like you don't have feh installed... Install feh? (Y/n): " ANSWER
+		case $ANSWER in
+		y | yes | Y | YES | "")
+			sudo pacman -S --noconfirm feh
+			return 0
+			;;
+		*)
+			return 1
+			;;
+		esac
+	else
+		return 0
+	fi
+
+}
+set_wallpaper() {
+	feh --bg-fill "$1"
+	if ! grep "feh --bg-fill" ~/.config/awesome/autostart.sh; then
+		echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
+	fi
+	sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
+}
+
+check_pywal_inst() {
+	echo "Checking if pywal is installed..."
+	if ! pacman -Qi python-pywal; then
+		echo "Installing pywal"
+		sudo pacman -S --noconfirm python-pywal
+	fi
+	return 0
+}
+
+set_pywal() {
+	echo "Runnging pywal with $IMGNAME..."
+	read -r -p "Do you want to generate dark theme?... (Y/n): " ANSWER
+	case $ANSWER in
+	y | yes | Y | YES | "")
+		wal -i "$1"
+		;;
+	*)
+		wal -l -i "$1"
+		;;
+	esac
+}
+
+set_pywal_autostart() {
+	echo "Adding wal theme to awesome autostart..."
+	if ! grep "wal -R" ~/.config/awesome/autostart.sh; then
+		echo "wal -R" >>~/.config/awesome/autostart.sh
+	fi
+}
+
+check_oomox_inst() {
+	echo "Checking if oomox is installed..."
+	if ! pacman -Qi oomox; then
+		echo "Installing oomox..."
+		yay -S --noconfirm --answerdiff=None oomox
+	fi
+	return 0
+}
+
+set_gtk_theme() {
+	echo "Configuring gtk themes..."
+	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox
+	lxappearance
+}
+
+set_icons() {
+	echo "Configuring icons..."
+	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox
+	echo "Oppening lxpappearance to apply theme and icons..."
+	lxappearance
+}
+
+check_firefox_inst() {
+	echo "Checking if firefox is installed..."
+	if ! pacman -Qi firefox; then
+		read -r -p "Seems like you don't have firefox installed... Install firefox? (Y/n): " ANSWER
+		case $ANSWER in
+		y | yes | Y | YES | "")
+			sudo pacman -S --noconfirm firefox
+			return 0
+			;;
+		*)
+			return 1
+			;;
+		esac
+	fi
+	return 0
+}
+
+check_pywalfox_inst() {
+	echo "Checking if pywalfox is installed..."
+	if ! pip show pywalfox; then
+		echo "Installing pywalfox..."
+		pip install pywalfox
+	fi
+	return 0
+}
+
+setup_pywalfox() {
+	sudo chmod +x ~/.local/lib/python3.8/site-packages/pywalfox/bin/main.sh
+	echo "Setuping pywalfox..."
+	pywalfox setup
+	echo "Running pywalfox daemon..."
+	pywalfox daemon &
+	echo "Now install firefox extension and fetch pywal colors..."
+	firefox https://addons.mozilla.org/en-US/firefox/addon/pywalfox/?src=search
+}
+
+check_telegram_inst() {
+	echo "Checking if telegram is installed..."
+	if ! pacman -Qi telegram-desktop; then
+		read -r -p "Seems like you don't have telegram installed... Install telegram-desktop? (Y/n): " ANSWER
+		case $ANSWER in
+		y | yes | Y | YES | "")
+			sudo pacman -S --noconfirm telegram-desktop
+			return 0
+			;;
+		*)
+			return 1
+			;;
+		esac
+	fi
+	return 0
+}
+
+set_telegram_pywal() {
+	echo "Clonning telegram-palette-gen repo..."
+	git clone --depth 1 https://github.com/matteoguarda/telegram-palette-gen ~/.telegram-palette-gen
+	echo "Generating theme for telegram..."
+	~/.telegram-palette-gen/telegram-palette-gen --wal
+	echo "Openning telegram to apply theme..."
+	telegram-desktop
+}
+
+check_lightdm_inst() {
+	echo "Checking if lightdm is installed..."
+	if ! pacman -Qi lightdm; then
+		echo "It seems like you don't have lightdm installed"
+		return 1
+	fi
+	return 0
+}
+
+set_lightdm_wallpaper() {
+	sudo cp "$1" /usr/share/pixmaps/lightdm_back.jpg
+	sudo chmod 777 /usr/share/pixmaps/lightdm_back.jpg
+}
+
+check_awesome_inst() {
+	echo "Checking if awesome is installed..."
+	if ! pacman -Qi awesome; then
+		echo "It seems like you don't have awesomewm installed..."
+		return 1
+	fi
+	return 0
+}
+
+set_awesome_pywal() {
+	echo "Setting wal colors for awesomewm..."
+	~/scripts/awesomewal
+	echo "Restarting awesome..."
+	echo 'awesome.restart()' | awesome-client
+}
+
+check_betterlockscreen_inst() {
+	echo "Checking if betterlockscreen is installed..."
+	if ! pacman -Qi betterlockscreen; then
+		echo "It seems like you don't have betterlockscreen installed..."
+		return 1
+	fi
+	return 0
+}
+
+set_betterlockscreen_wallpaper() {
+	betterlockscreen -u "$1"
+}
+
+check_doomemacs_inst() {
+	if ! ~/.emacs.d/bin/doom info; then
+		echo "It seems like you don't have doom emacs installed"
+		return 1
+	fi
+	return 0
+}
+
+set_doomemacs_pywal() {
+	if ! grep "(package! ewal)" ~/.doom.d/packages.el; then
+		echo "(package! ewal)" >>~/.doom.d/packages.el
+	fi
+	if ! grep "(package! ewal-doom-themes)" ~/.doom.d/packages.el; then
+		echo "(package! ewal-doom-themes)" >>~/.doom.d/packages.el
+	fi
+	if ! grep "(package! ewal-evil-cursors)" ~/.doom.d/packages.el; then
+		echo "(package! ewal-evil-cursors)" >>~/.doom.d/packages.el
+	fi
+	~/.emacs.d/bin/doom sync && ~/.emacs.d/bin/doom build
+	sed -ir "s|^(setq doom-theme '\S*)|(setq doom-theme 'ewal-doom-one)|g" ~/.doom.d/config.el
+}
+
+read -r -p "Set $IMG as a wallpapaper?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_feh_inst; then
+		set_wallpaper "$@"
+	fi
+	;;
+esac
+
+if check_pywal_inst; then
+	set_pywal "$@"
 fi
-sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
 
-# wal itself
-echo "Checking if pywal is installed..."
-if ! pacman -Qi python-pywal; then
-	echo "Installing pywal"
-	sudo pacman -S --noconfirm python-pywal
-fi
-echo "Runnging pywal with $IMGNAME..."
-wal -i "$1"
-# TODO add check for window manager
-echo "Adding wal theme to awesome autostart..."
-if ! grep "wal -R" ~/.config/awesome/autostart.sh; then
-	echo "wal -R" >>~/.config/awesome/autostart.sh
-fi
+read -r -p "Enable pywal theme on awesome startup?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_awesome_inst; then
+		set_pywal_autostart
+	fi
+	;;
+esac
 
-# GTK theme
-echo "Checking if oomox is installed..."
-if ! pacman -Qi oomox; then
-	echo "Installing oomox..."
-	yay -S --noconfirm --answerdiff=None oomox
-fi
-echo "Configuring gtk themes..."
-/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox
-echo "Configuring icons..."
-/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox
-echo "Oppening lxpappearance to apply theme and icons..."
-lxappearance
+read -r -p "Generate pywal theme for gtk?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_oomox_inst; then
+		set_gtk_theme
+	fi
+	;;
+esac
 
-# firefox
-echo "Checking if pywalfox is installed..."
-if ! pip show pywalfox; then
-	echo "Installing pywalfox..."
-	pip install pywalfox
-fi
+read -r -p "Generate pywal icons?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_oomox_inst; then
+		set_icons
+	fi
+	;;
+esac
 
-sudo chmod +x ~/.local/lib/python3.8/site-packages/pywalfox/bin/main.sh
-echo "Setuping pywalfox..."
-pywalfox setup
-echo "Running pywalfox daemon..."
-pywalfox daemon &
-echo "Now install firefox extension and fetch pywal colors..."
-firefox https://addons.mozilla.org/en-US/firefox/addon/pywalfox/?src=search
+read -r -p "Generate pywal theme for firefox?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_firefox_inst; then
+		if check_pywalfox_inst; then
+			setup_pywalfox
+		fi
+	fi
+	;;
+esac
 
-# telegram
-echo "Clonning telegram-palette-gen repo..."
-git clone --depth 1 https://github.com/matteoguarda/telegram-palette-gen ~/.telegram-palette-gen
-echo "Generating theme for telegram..."
-~/.telegram-palette-gen/telegram-palette-gen --wal
-echo "Openning telegram to apply theme..."
-telegram-desktop
+read -r -p "Generate pywal theme for telegram?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_telegram_inst; then
+		set_telegram_pywal
+	fi
+	;;
+esac
 
-# awesome
-echo "Setting wal colors for awesomewm..."
-~/scripts/awesomewal
-echo "Restarting awesome..."
-echo 'awesome.restart()' | awesome-client
+read -r -p "Install $IMG as a lightdm background?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_lightdm_inst; then
+		set_lightdm_wallpaper "$@"
+	fi
+	;;
+esac
+
+read -r -p "Generate pywal theme for awesomewm?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_awesome_inst; then
+		set_awesome_pywal
+	fi
+	;;
+esac
+
+read -r -p "Set $IMG as a betterlockscreen wallpaper?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_betterlockscreen_inst; then
+		set_betterlockscreen_wallpaper "$@"
+	fi
+	;;
+esac
+
+read -r -p "Set pywal theme for emacs?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_doomemacs_inst; then
+		set_doomemacs_pywal
+	fi
+	;;
+esac
