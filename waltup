@@ -3,23 +3,13 @@
 IMG=$(basename "$1")
 IMGNAME="${IMG%.*}"
 
-check_feh_inst() {
-	echo "Checking if feh is installed..."
-	if ! pacman -Qi feh; then
-		read -r -p "Seems like you don't have feh installed... Install feh? (Y/n): " ANSWER
-		case $ANSWER in
-		y | yes | Y | YES | "")
-			sudo pacman -S --noconfirm feh
-			return 0
-			;;
-		*)
-			return 1
-			;;
-		esac
-	else
-		return 0
+check_inst() {
+	echo "Checking if $1 is installed..."
+	if ! pacman -Qi "$1"; then
+		echo "Installing pywal"
+		yay -S --noconfirm "$1"
 	fi
-
+	return 0
 }
 set_wallpaper() {
 	feh --bg-fill "$1"
@@ -27,15 +17,6 @@ set_wallpaper() {
 		echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
 	fi
 	sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
-}
-
-check_pywal_inst() {
-	echo "Checking if pywal is installed..."
-	if ! pacman -Qi python-pywal; then
-		echo "Installing pywal"
-		sudo pacman -S --noconfirm python-pywal
-	fi
-	return 0
 }
 
 set_pywal() {
@@ -58,15 +39,6 @@ set_pywal_autostart() {
 	fi
 }
 
-check_oomox_inst() {
-	echo "Checking if oomox is installed..."
-	if ! pacman -Qi oomox; then
-		echo "Installing oomox..."
-		yay -S --noconfirm --answerdiff=None oomox
-	fi
-	return 0
-}
-
 set_gtk_theme() {
 	echo "Configuring gtk themes..."
 	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox
@@ -78,23 +50,6 @@ set_icons() {
 	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox
 	echo "Oppening lxpappearance to apply theme and icons..."
 	lxappearance
-}
-
-check_firefox_inst() {
-	echo "Checking if firefox is installed..."
-	if ! pacman -Qi firefox; then
-		read -r -p "Seems like you don't have firefox installed... Install firefox? (Y/n): " ANSWER
-		case $ANSWER in
-		y | yes | Y | YES | "")
-			sudo pacman -S --noconfirm firefox
-			return 0
-			;;
-		*)
-			return 1
-			;;
-		esac
-	fi
-	return 0
 }
 
 check_pywalfox_inst() {
@@ -116,23 +71,6 @@ setup_pywalfox() {
 	firefox https://addons.mozilla.org/en-US/firefox/addon/pywalfox/?src=search
 }
 
-check_telegram_inst() {
-	echo "Checking if telegram is installed..."
-	if ! pacman -Qi telegram-desktop; then
-		read -r -p "Seems like you don't have telegram installed... Install telegram-desktop? (Y/n): " ANSWER
-		case $ANSWER in
-		y | yes | Y | YES | "")
-			sudo pacman -S --noconfirm telegram-desktop
-			return 0
-			;;
-		*)
-			return 1
-			;;
-		esac
-	fi
-	return 0
-}
-
 set_telegram_pywal() {
 	echo "Clonning telegram-palette-gen repo..."
 	git clone --depth 1 https://github.com/matteoguarda/telegram-palette-gen ~/.telegram-palette-gen
@@ -142,27 +80,9 @@ set_telegram_pywal() {
 	telegram-desktop
 }
 
-check_lightdm_inst() {
-	echo "Checking if lightdm is installed..."
-	if ! pacman -Qi lightdm; then
-		echo "It seems like you don't have lightdm installed"
-		return 1
-	fi
-	return 0
-}
-
 set_lightdm_wallpaper() {
 	sudo cp "$1" /usr/share/pixmaps/lightdm_back.jpg
 	sudo chmod 777 /usr/share/pixmaps/lightdm_back.jpg
-}
-
-check_awesome_inst() {
-	echo "Checking if awesome is installed..."
-	if ! pacman -Qi awesome; then
-		echo "It seems like you don't have awesomewm installed..."
-		return 1
-	fi
-	return 0
 }
 
 set_awesome_pywal() {
@@ -170,15 +90,6 @@ set_awesome_pywal() {
 	~/scripts/awesomewal
 	echo "Restarting awesome..."
 	echo 'awesome.restart()' | awesome-client
-}
-
-check_betterlockscreen_inst() {
-	echo "Checking if betterlockscreen is installed..."
-	if ! pacman -Qi betterlockscreen; then
-		echo "It seems like you don't have betterlockscreen installed..."
-		return 1
-	fi
-	return 0
 }
 
 set_betterlockscreen_wallpaper() {
@@ -203,27 +114,37 @@ set_doomemacs_pywal() {
 	if ! grep "(package! ewal-evil-cursors)" ~/.doom.d/packages.el; then
 		echo "(package! ewal-evil-cursors)" >>~/.doom.d/packages.el
 	fi
-	~/.emacs.d/bin/doom sync && ~/.emacs.d/bin/doom build
+	~/.emacs.d/bin/doom sync
 	sed -ir "s|^(setq doom-theme '\S*)|(setq doom-theme 'ewal-doom-one)|g" ~/.doom.d/config.el
+}
+
+set_discord_pywal() {
+	echo "Installing beautifuldiscord..."
+	python3 -m pip install -U https://github.com/leovoel/BeautifulDiscord/archive/master.zip
+	git clone https://github.com/guglicap/wal-discord ~/wal-discord
+	ln -s ~/wal-discord/wal-discord ~/.local/bin
+	wal-discord
+	echo "If you're running this script first time run 'beautifuldiscord --css ~/.cache/wal-discord/style.css' after the script"
+
 }
 
 read -r -p "Set $IMG as a wallpapaper?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_feh_inst; then
+	if check_inst feh; then
 		set_wallpaper "$@"
 	fi
 	;;
 esac
 
-if check_pywal_inst; then
+if check_inst python-pywal; then
 	set_pywal "$@"
 fi
 
 read -r -p "Enable pywal theme on awesome startup?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_awesome_inst; then
+	if check_inst awesome; then
 		set_pywal_autostart
 	fi
 	;;
@@ -232,7 +153,7 @@ esac
 read -r -p "Generate pywal theme for gtk?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_oomox_inst; then
+	if check_inst oomox; then
 		set_gtk_theme
 	fi
 	;;
@@ -241,7 +162,7 @@ esac
 read -r -p "Generate pywal icons?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_oomox_inst; then
+	if check_inst oomox; then
 		set_icons
 	fi
 	;;
@@ -250,7 +171,7 @@ esac
 read -r -p "Generate pywal theme for firefox?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_firefox_inst; then
+	if check_inst firefox; then
 		if check_pywalfox_inst; then
 			setup_pywalfox
 		fi
@@ -261,7 +182,7 @@ esac
 read -r -p "Generate pywal theme for telegram?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_telegram_inst; then
+	if check_inst telegram-desktop; then
 		set_telegram_pywal
 	fi
 	;;
@@ -270,7 +191,7 @@ esac
 read -r -p "Install $IMG as a lightdm background?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_lightdm_inst; then
+	if check_inst lightdm; then
 		set_lightdm_wallpaper "$@"
 	fi
 	;;
@@ -279,7 +200,7 @@ esac
 read -r -p "Generate pywal theme for awesomewm?... (Y/n): " ANSWER
 case $ANSWER in
 y | yes | Y | YES | "")
-	if check_awesome_inst; then
+	if check_inst awesome; then
 		set_awesome_pywal
 	fi
 	;;
@@ -299,6 +220,15 @@ case $ANSWER in
 y | yes | Y | YES | "")
 	if check_doomemacs_inst; then
 		set_doomemacs_pywal
+	fi
+	;;
+esac
+
+read -r -p "Set pywal theme for discord?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_inst discord; then
+		set_discord_pywal
 	fi
 	;;
 esac
