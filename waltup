@@ -13,7 +13,7 @@ check_inst() {
 }
 set_wallpaper() {
 	feh --bg-fill "$1"
-	if ! grep "feh --bg-fill" ~/.config/awesome/autostart.sh; then
+	if ! grep "^feh --bg-fill" ~/.config/awesome/autostart.sh; then
 		echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
 	fi
 	sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
@@ -34,7 +34,7 @@ set_pywal() {
 
 set_pywal_autostart() {
 	echo "Adding wal theme to awesome autostart..."
-	if ! grep "wal -R" ~/.config/awesome/autostart.sh; then
+	if ! grep "^wal -R" ~/.config/awesome/autostart.sh; then
 		echo "wal -R" >>~/.config/awesome/autostart.sh
 	fi
 }
@@ -63,7 +63,7 @@ check_pywalfox_inst() {
 
 setup_pywalfox() {
 	sudo chmod +x ~/.local/lib/python3.8/site-packages/pywalfox/bin/main.sh
-	echo "Setuping pywalfox..."
+	echo "Setting pywalfox up..."
 	pywalfox setup
 	echo "Running pywalfox daemon..."
 	pywalfox daemon &
@@ -105,17 +105,27 @@ check_doomemacs_inst() {
 }
 
 set_doomemacs_pywal() {
-	if ! grep "(package! ewal)" ~/.doom.d/packages.el; then
-		echo "(package! ewal)" >>~/.doom.d/packages.el
+	if ! grep "^(package! ewal)" ~/.doom.d/packages.el; then
+		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal)\n&/' ~/.doom.d/packages.el
 	fi
-	if ! grep "(package! ewal-doom-themes)" ~/.doom.d/packages.el; then
-		echo "(package! ewal-doom-themes)" >>~/.doom.d/packages.el
+	if ! grep "^(package! ewal-doom-themes)" ~/.doom.d/packages.el; then
+		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal-doom-themes)\n&/' ~/.doom.d/packages.el
 	fi
-	if ! grep "(package! ewal-evil-cursors)" ~/.doom.d/packages.el; then
-		echo "(package! ewal-evil-cursors)" >>~/.doom.d/packages.el
+	if ! grep "^(package! ewal-evil-cursors)" ~/.doom.d/packages.el; then
+		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal-evil-cursors)\n&/' ~/.doom.d/packages.el
 	fi
 	~/.emacs.d/bin/doom sync
 	sed -ir "s|^(setq doom-theme '\S*)|(setq doom-theme 'ewal-doom-one)|g" ~/.doom.d/config.el
+}
+
+set_vim_pywal() {
+	if ! grep "^Plugin 'dylanraps/wal.vim'" ~/.vimrc; then
+		sed -i "0,/^Plugin '\S*'$/s/^Plugin '\S*'$/Plugin 'dylanraps/wal.vim'\n&/" ~/.vimrc
+	fi
+	if ! grep "^colorsheme wal"; then
+		sed -i "s/^colorscheme \S*$/colorscheme wal/g" ~/.vimrc
+	fi
+	vim +'PluginInstall --sync' +qa
 }
 
 set_discord_pywal() {
@@ -229,6 +239,15 @@ case $ANSWER in
 y | yes | Y | YES | "")
 	if check_inst discord; then
 		set_discord_pywal
+	fi
+	;;
+esac
+
+read -r -p "Set pywal theme for vim?... (Y/n): " ANSWER
+case $ANSWER in
+y | yes | Y | YES | "")
+	if check_inst vim; then
+		set_vim_pywal
 	fi
 	;;
 esac
