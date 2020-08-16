@@ -1,62 +1,75 @@
 #!/usr/bin/env bash
 
-IMG=$(basename "$1")
+IMGPATH=$1
+IMG=$(basename "$IMGPATH")
 IMGNAME="${IMG%.*}"
+
+show_help() {
+	cat <<EOF
+"Usage: waltup /abs/path/to/img"
+EOF
+	exit 1
+}
+
+if [ $# = 0 ]; then
+	echo "Missing argument!"
+	show_help
+fi
 
 check_inst() {
 	echo "Checking if $1 is installed..."
-	if ! pacman -Qi "$1"; then
-		echo "Installing pywal"
-		yay -S --noconfirm "$1"
+	if ! pacman -Qi "$1" >/dev/null; then
+		echo "Installing $1 ..."
+		yay -S "$1"
 	fi
 	return 0
 }
 set_wallpaper() {
-	feh --bg-fill "$1"
-	if ! grep "^feh --bg-fill" ~/.config/awesome/autostart.sh; then
-		echo "feh --bg-fill $1" >>~/.config/awesome/autostart.sh
+	echo "Setting $IMG as a wallpaper..."
+	feh --bg-fill "$IMGPATH"
+	if ! grep "^feh --bg-fill" ~/.config/awesome/autostart.sh >/dev/null; then
+		echo "feh --bg-fill $IMGPATH" >>~/.config/awesome/autostart.sh
 	fi
-	sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $1|g" ~/.config/awesome/autostart.sh
+	sed -ir "s|^feh --bg-fill \S*$|feh --bg-fill $IMGPATH|g" ~/.config/awesome/autostart.sh
 }
 
 set_pywal() {
 	echo "Runnging pywal with $IMGNAME..."
-	read -r -p "Do you want to generate dark theme?... (Y/n): " ANSWER
-	case $ANSWER in
-	y | yes | Y | YES | "")
-		wal -i "$1"
+	case $1 in
+	dark)
+		wal -q -i "$IMGPATH"
 		;;
-	*)
-		wal -l -i "$1"
+	light)
+		wal -l -q -i "$IMGPATH"
 		;;
 	esac
 }
 
 set_pywal_autostart() {
 	echo "Adding wal theme to awesome autostart..."
-	if ! grep "^wal -R" ~/.config/awesome/autostart.sh; then
+	if ! grep "^wal -R" ~/.config/awesome/autostart.sh >/dev/null; then
 		echo "wal -R" >>~/.config/awesome/autostart.sh
 	fi
 }
 
 set_gtk_theme() {
 	echo "Configuring gtk themes..."
-	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox
+	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox >/dev/null
 	lxappearance
 }
 
 set_icons() {
 	echo "Configuring icons..."
-	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox
+	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox >/dev/null
 	echo "Oppening lxpappearance to apply theme and icons..."
-	lxappearance
+	lxappearance >/dev/null
 }
 
 check_pywalfox_inst() {
 	echo "Checking if pywalfox is installed..."
-	if ! pip show pywalfox; then
+	if ! pip show pywalfox >/dev/null; then
 		echo "Installing pywalfox..."
-		pip install pywalfox
+		pip install pywalfox >/dev/null
 	fi
 	return 0
 }
@@ -69,6 +82,7 @@ setup_pywalfox() {
 	pywalfox daemon &
 	echo "Now install firefox extension and fetch pywal colors..."
 	firefox https://addons.mozilla.org/en-US/firefox/addon/pywalfox/?src=search
+	# killall pywalfox
 }
 
 set_telegram_pywal() {
@@ -77,11 +91,12 @@ set_telegram_pywal() {
 	echo "Generating theme for telegram..."
 	~/.telegram-palette-gen/telegram-palette-gen --wal
 	echo "Openning telegram to apply theme..."
-	telegram-desktop
+	telegram-desktop >/dev/null
 }
 
 set_lightdm_wallpaper() {
-	sudo cp "$1" /usr/share/pixmaps/lightdm_back.jpg
+	echo "Setting $IMG as a lightdm wallpaper..."
+	sudo cp "$IMGPATH" /usr/share/pixmaps/lightdm_back.jpg
 	sudo chmod 777 /usr/share/pixmaps/lightdm_back.jpg
 }
 
@@ -89,14 +104,16 @@ set_awesome_pywal() {
 	echo "Setting wal colors for awesomewm..."
 	~/scripts/awesomewal
 	echo "Restarting awesome..."
-	echo 'awesome.restart()' | awesome-client
+	echo 'awesome.restart()' | awesome-client >/dev/null
 }
 
 set_betterlockscreen_wallpaper() {
-	betterlockscreen -u "$1"
+	echo "Setting $IMG as a betterlockscreen wallpaper..."
+	betterlockscreen -u "$IMGPATH"
 }
 
 check_doomemacs_inst() {
+	echo "Checking if you have doome emacs installed..."
 	if ! ~/.emacs.d/bin/doom info; then
 		echo "It seems like you don't have doom emacs installed"
 		return 1
@@ -105,13 +122,14 @@ check_doomemacs_inst() {
 }
 
 set_doomemacs_pywal() {
-	if ! grep "^(package! ewal)" ~/.doom.d/packages.el; then
+	echo "Setting pywal theme for doom emacs..."
+	if ! grep "^(package! ewal)" ~/.doom.d/packages.el >/dev/null; then
 		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal)\n&/' ~/.doom.d/packages.el
 	fi
-	if ! grep "^(package! ewal-doom-themes)" ~/.doom.d/packages.el; then
+	if ! grep "^(package! ewal-doom-themes)" ~/.doom.d/packages.el >/dev/null; then
 		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal-doom-themes)\n&/' ~/.doom.d/packages.el
 	fi
-	if ! grep "^(package! ewal-evil-cursors)" ~/.doom.d/packages.el; then
+	if ! grep "^(package! ewal-evil-cursors)" ~/.doom.d/packages.el >/dev/null; then
 		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal-evil-cursors)\n&/' ~/.doom.d/packages.el
 	fi
 	~/.emacs.d/bin/doom sync
@@ -119,13 +137,14 @@ set_doomemacs_pywal() {
 }
 
 set_vim_pywal() {
-	if ! grep "^Plugin 'dylanraps/wal.vim'" ~/.vimrc; then
-		sed -i "0,/^Plugin '\S*'$/s/^Plugin '\S*'$/Plugin 'dylanraps/wal.vim'\n&/" ~/.vimrc
+	echo "Setting pywal theme for vim..."
+	if ! grep "^Plugin 'dylanaraps/wal.vim'" ~/.vimrc >/dev/null; then
+		sed -i "0,/^Plugin '\S*'$/s/^Plugin '\S*'$/Plugin 'dylanraps\/wal.vim'\n&/" ~/.vimrc
 	fi
-	if ! grep "^colorsheme wal"; then
+	if ! grep "^colorscheme wal" ~/.vimrc >/dev/null; then
 		sed -i "s/^colorscheme \S*$/colorscheme wal/g" ~/.vimrc
 	fi
-	vim +'PluginInstall --sync' +qa
+	nvim + 'PluginInstall --sync' +qa
 }
 
 set_discord_pywal() {
@@ -133,121 +152,153 @@ set_discord_pywal() {
 	python3 -m pip install -U https://github.com/leovoel/BeautifulDiscord/archive/master.zip
 	git clone https://github.com/guglicap/wal-discord ~/wal-discord
 	ln -s ~/wal-discord/wal-discord ~/.local/bin
-	wal-discord
+	echo "Generating pywal theme for discord..."
+	wal-discord >/dev/null
 	echo "If you're running this script first time run 'beautifuldiscord --css ~/.cache/wal-discord/style.css' after the script"
 
 }
 
+read -r -p "Do you want to generate light theme?... (y/N): " ANSWER
+case $ANSWER in
+y | yes | Y | YES)
+	echo "Setting light pywal theme up..."
+	check_inst python-pywal && set_pywal light
+	;;
+*)
+	echo "Setting dark pywal theme up..."
+	check_inst python-pywal && set_pywal dark
+	;;
+esac
+
+# -w flag
 read -r -p "Set $IMG as a wallpapaper?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst feh; then
-		set_wallpaper "$@"
-	fi
+n | no | N | NO)
+	echo "Skipping setting $IMG as a wallpaper..."
+	;;
+*)
+	check_inst feh && set_wallpaper
 	;;
 esac
 
-if check_inst python-pywal; then
-	set_pywal "$@"
-fi
+# -m flag
+read -r -p "Set $IMG as a lightdm background?... (Y/n): " ANSWER
+case $ANSWER in
+n | no | N | NO)
+	echo "Skipping setting $IMG as a lightdm background..."
+	;;
+*)
+	check_inst lightdm && set_lightdm_wallpaper
+	;;
+esac
 
+# -b flag
+read -r -p "Set $IMG as a betterlockscreen background?... (Y/n): " ANSWER
+case $ANSWER in
+n | no | N | NO)
+	echo "Skipping setting $IMG as a betterlockscreen wallpaper..."
+	;;
+*)
+	check_inst betterlockscreen && set_betterlockscreen_wallpaper
+	;;
+esac
+
+# -s flag
 read -r -p "Enable pywal theme on awesome startup?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst awesome; then
-		set_pywal_autostart
-	fi
+n | no | N | NO)
+	echo "Skipping setting pywal theme on awesomewm startup..."
+	;;
+
+*)
+	check_inst awesome && set_pywal_autostart
 	;;
 esac
 
+# -g flag
 read -r -p "Generate pywal theme for gtk?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst oomox; then
-		set_gtk_theme
-	fi
+n | no | N | NO)
+	echo "Skipping generating pywal theme for gtk..."
+	;;
+*)
+	check_inst oomox && set_gtk_theme
 	;;
 esac
 
+# -i flag
 read -r -p "Generate pywal icons?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst oomox; then
-		set_icons
-	fi
+n | no | N | NO)
+	echo "Skipping generating pywal icons..."
+	;;
+*)
+	check_inst oomox && set_icons
 	;;
 esac
 
+# -f flag
 read -r -p "Generate pywal theme for firefox?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst firefox; then
-		if check_pywalfox_inst; then
-			setup_pywalfox
-		fi
-	fi
+n | no | N | NO)
+	echo "Skipping generation pywal theme for firefox..."
+	;;
+*)
+	check_inst firefox && check_pywalfox_inst && setup_pywalfox
 	;;
 esac
 
+# -t flag
 read -r -p "Generate pywal theme for telegram?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst telegram-desktop; then
-		set_telegram_pywal
-	fi
+n | no | N | NO)
+	echo "Skipping generating pywal theme for telegram..."
+	;;
+*)
+	check_inst telegram-desktop && set_telegram_pywal
 	;;
 esac
 
-read -r -p "Install $IMG as a lightdm background?... (Y/n): " ANSWER
-case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst lightdm; then
-		set_lightdm_wallpaper "$@"
-	fi
-	;;
-esac
-
-read -r -p "Generate pywal theme for awesomewm?... (Y/n): " ANSWER
-case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst awesome; then
-		set_awesome_pywal
-	fi
-	;;
-esac
-
-read -r -p "Set $IMG as a betterlockscreen wallpaper?... (Y/n): " ANSWER
-case $ANSWER in
-y | yes | Y | YES | "")
-	if check_betterlockscreen_inst; then
-		set_betterlockscreen_wallpaper "$@"
-	fi
-	;;
-esac
-
-read -r -p "Set pywal theme for emacs?... (Y/n): " ANSWER
-case $ANSWER in
-y | yes | Y | YES | "")
-	if check_doomemacs_inst; then
-		set_doomemacs_pywal
-	fi
-	;;
-esac
-
+# -d flag
 read -r -p "Set pywal theme for discord?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst discord; then
-		set_discord_pywal
-	fi
+n | no | N | NO)
+	echo "Skipping setting pywal theme for discord..."
+	;;
+*)
+	check_inst discord && set_discord_pywal
 	;;
 esac
 
+# -e flag
+read -r -p "Set pywal theme for emacs?... (Y/n): " ANSWER
+case $ANSWER in
+n | no | N | NO)
+	echo "Skipping setting pywal theme for emacs..."
+	;;
+*)
+	check_doomemacs_inst && set_doomemacs_pywal
+	;;
+esac
+
+# -v flag
 read -r -p "Set pywal theme for vim?... (Y/n): " ANSWER
 case $ANSWER in
-y | yes | Y | YES | "")
-	if check_inst vim; then
-		set_vim_pywal
-	fi
+n | no | N | NO)
+	echo "Skipping setting pywal theme for vim..."
+	;;
+*)
+	check_inst vim && set_vim_pywal
+	;;
+esac
+
+# -a flag
+read -r -p "Generate pywal theme for awesomewm?... (Y/n): " ANSWER
+case $ANSWER in
+n | no | N | NO)
+	echo "Skipping generating pywal theme for awesomewm..."
+	;;
+*)
+	check_inst awesome && set_awesome_pywal
 	;;
 esac
