@@ -22,7 +22,7 @@ check_inst() {
 	echo -e "${boldon}${purplef}Checking if ${invon}$1${invoff} is installed...${boldoff}${reset}"
 	if ! pacman -Qi "$1" >/dev/null; then
 		echo -e "Installing ${invon}$1${invoff}..."
-		yay -S "$1"
+		yay -S --noconfirm "$1"
 	fi
 	return 0
 }
@@ -56,13 +56,13 @@ set_pywal_autostart() {
 
 set_gtk_theme() {
 	echo -e "${yellowf}Configuring gtk themes...${reset}"
-	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-oomox-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox >/dev/null
+	/opt/oomox/plugins/theme_oomox/gtk-theme/change_color.sh -o wal-"$IMGNAME" -m all -d true --hidpi --true ~/.cache/wal/colors-oomox >/dev/null
 	lxappearance
 }
 
 set_icons() {
 	echo -e "${yellowf}Configuring icons...${reset}"
-	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-oomox-icons-"$IMGNAME" ~/.cache/wal/colors-oomox >/dev/null
+	/opt/oomox/plugins/icons_gnomecolors/gnome-colors-icon-theme/change_color.sh -o wal-icons-"$IMGNAME" ~/.cache/wal/colors-oomox >/dev/null
 	echo "${greenf}Oppening lxpappearance to apply theme and icons...${reset}"
 	lxappearance >/dev/null
 }
@@ -72,6 +72,7 @@ check_pywalfox_inst() {
 	if ! pip show pywalfox >/dev/null; then
 		echo "Installing pywalfox..."
 		pip install pywalfox >/dev/null
+		export PATH=$PATH:$HOME/.local/bin
 	fi
 	return 0
 }
@@ -116,7 +117,7 @@ set_betterlockscreen_wallpaper() {
 
 check_doomemacs_inst() {
 	echo -e "${boldon}${purplef}Checking if you have doome emacs installed...${reset}${boldon}"
-	if ! ~/.emacs.d/bin/doom info; then
+	if ! ~/.emacs.d/bin/doom info >/dev/null; then
 		echo -e "${redf}It seems like you don't have doom emacs installed${reset}"
 		return 1
 	fi
@@ -134,18 +135,19 @@ set_doomemacs_pywal() {
 	if ! grep "^(package! ewal-evil-cursors)" ~/.doom.d/packages.el >/dev/null; then
 		sed -i '0,/^(package! \S*)$/s/^(package! \S*)$/(package! ewal-evil-cursors)\n&/' ~/.doom.d/packages.el
 	fi
-	~/.emacs.d/bin/doom sync
+	~/.emacs.d/bin/doom sync >/dev/null
 	sed -ir "s|^(setq doom-theme '\S*)|(setq doom-theme 'ewal-doom-one)|g" ~/.doom.d/config.el
 }
 
 set_vim_pywal() {
 	echo -e "${yellowf}Setting pywal theme for vim...${reset}"
 	if ! grep "^Plugin 'dylanaraps/wal.vim'" ~/.vimrc >/dev/null; then
-		sed -i "0,/^Plugin '\S*'$/s/^Plugin '\S*'$/Plugin 'dylanraps\/wal.vim'\n&/" ~/.vimrc
+		sed -i "0,/^Plugin '\S*'$/s/^Plugin '\S*'$/Plugin 'dylanaraps\/wal.vim'\n&/" ~/.vimrc
 	fi
 	if ! grep "^colorscheme wal" ~/.vimrc >/dev/null; then
 		sed -i "s/^colorscheme \S*$/colorscheme wal/g" ~/.vimrc
 	fi
+	echo -e "${readf} If you have termguicolors in your vim config, you should comment it out..."
 	nvim + 'PluginInstall --sync' +qa
 }
 
