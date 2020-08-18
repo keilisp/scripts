@@ -160,7 +160,7 @@ set_discord_pywal() {
 
 }
 
-read -r -p "Do you want to generate light theme?... (y/N): " ANSWER
+read -r -p "${bluef}Do you want to generate light theme?... (y/N): ${reset}" ANSWER
 case $ANSWER in
 y | yes | Y | YES)
 	echo -e "${yellowf}Setting light pywal theme up...${reset}"
@@ -173,7 +173,7 @@ y | yes | Y | YES)
 esac
 
 # -w flag
-read -r -p "Set $IMG as a wallpapaper?... (Y/n): " ANSWER
+read -r -p "${bluef}Set $IMG as a wallpapaper?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting $IMG as a wallpaper...${reset}"
@@ -184,7 +184,7 @@ n | no | N | NO)
 esac
 
 # -m flag
-read -r -p "Set $IMG as a lightdm background?... (Y/n): " ANSWER
+read -r -p "${bluef}Set $IMG as a lightdm background?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting $IMG as a lightdm background...${redf}"
@@ -195,7 +195,7 @@ n | no | N | NO)
 esac
 
 # -b flag
-read -r -p "Set $IMG as a betterlockscreen background?... (Y/n): " ANSWER
+read -r -p "${bluef}Set $IMG as a betterlockscreen background?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting $IMG as a betterlockscreen wallpaper...${reset}"
@@ -206,7 +206,7 @@ n | no | N | NO)
 esac
 
 # -s flag
-read -r -p "Enable pywal theme on awesome startup?... (Y/n): " ANSWER
+read -r -p "${bluef}Enable pywal theme on awesome startup?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting pywal theme on awesomewm startup...${reset}"
@@ -218,7 +218,7 @@ n | no | N | NO)
 esac
 
 # -g flag
-read -r -p "Generate pywal theme for gtk?... (Y/n): " ANSWER
+read -r -p "${bluef}Generate pywal theme for gtk?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping generating pywal theme for gtk...${reset}"
@@ -229,7 +229,7 @@ n | no | N | NO)
 esac
 
 # -i flag
-read -r -p "Generate pywal icons?... (Y/n): " ANSWER
+read -r -p "${bluef}Generate pywal icons?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping generating pywal icons...${reset}"
@@ -240,7 +240,7 @@ n | no | N | NO)
 esac
 
 # -f flag
-read -r -p "Generate pywal theme for firefox?... (Y/n): " ANSWER
+read -r -p "${bluef}Generate pywal theme for firefox?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping generation pywal theme for firefox...${reset}"
@@ -251,7 +251,7 @@ n | no | N | NO)
 esac
 
 # -t flag
-read -r -p "Generate pywal theme for telegram?... (Y/n): " ANSWER
+read -r -p "${bluef}Generate pywal theme for telegram?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping generating pywal theme for telegram...${reset}"
@@ -262,7 +262,7 @@ n | no | N | NO)
 esac
 
 # -d flag
-read -r -p "Set pywal theme for discord?... (Y/n): " ANSWER
+read -r -p "${bluef}Set pywal theme for discord?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting pywal theme for discord...${reset}"
@@ -273,7 +273,7 @@ n | no | N | NO)
 esac
 
 # -e flag
-read -r -p "Set pywal theme for emacs?... (Y/n): " ANSWER
+read -r -p "${bluef}Set pywal theme for emacs?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting pywal theme for emacs...${reset}"
@@ -284,7 +284,7 @@ n | no | N | NO)
 esac
 
 # -v flag
-read -r -p "Set pywal theme for vim?... (Y/n): " ANSWER
+read -r -p "${bluef}Set pywal theme for vim?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping setting pywal theme for vim...${reset}"
@@ -295,7 +295,7 @@ n | no | N | NO)
 esac
 
 # -a flag
-read -r -p "Generate pywal theme for awesomewm?... (Y/n): " ANSWER
+read -r -p "${bluef}Generate pywal theme for awesomewm?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	echo -e "${redf}Skipping generating pywal theme for awesomewm...${reset}"
