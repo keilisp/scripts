@@ -162,7 +162,7 @@ set_discord_pywal() {
 
 }
 
-read -r -p "${bluef}Do you want to generate theme base on $IMG?... (Y/n): ${reset}" ANSWER
+read -r -p "${bluef}Do you want to generate theme based on $IMG?... (Y/n): ${reset}" ANSWER
 case $ANSWER in
 n | no | N | NO)
 	read -r -p "${purplef}Do you want to generate light theme?... (y/N): ${reset}" ANSWER
@@ -181,18 +181,6 @@ n | no | N | NO)
 	echo -e "${redf}Skipping generating colorscheme based on $IMG...${reset}"
 	;;
 esac
-
-# read -r -p "${bluef}Do you want to generate light theme?... (y/N): ${reset}" ANSWER
-# case $ANSWER in
-# y | yes | Y | YES)
-# 	echo -e "${yellowf}Setting light pywal theme up...${reset}"
-# 	check_inst python-pywal && set_pywal light
-# 	;;
-# *)
-# 	echo -e "${yellowf}Setting dark pywal theme up...${reset}"
-# 	check_inst python-pywal && set_pywal dark
-# 	;;
-# esac
 
 # -w flag
 read -r -p "${bluef}Set $IMG as a wallpapaper?... (Y/n): ${reset}" ANSWER
