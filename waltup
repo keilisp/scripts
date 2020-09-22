@@ -72,8 +72,8 @@ check_pywalfox_inst() {
 	if ! pip show pywalfox >/dev/null; then
 		echo "Installing pywalfox..."
 		pip install pywalfox >/dev/null
-		export PATH=$PATH:$HOME/.local/bin
 	fi
+	export PATH=$PATH:$HOME/.local/bin
 	return 0
 }
 
