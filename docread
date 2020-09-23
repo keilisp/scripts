@@ -20,7 +20,7 @@ if [[ -d $dox ]]; then
 			sed -e 's/\.[[:alpha:]]*$//' |
 			dmenu -i -l 15 -p "Dox..." -nb '#282828' -sf '#fabd2f' -sb '#504945' -nf '#a89984' -fn 'Mononoki Nerd Font:bold:pixelsize=13')
 
-		if [[ $doc_choice ]]; then
+		if [[ ($doc_choice) && (-e $category_folder/$doc_choice.pdf) ]]; then
 			zathura "$category_folder/$doc_choice.pdf"
 		else
 			notify-send "💣 Error during oppening the document"
