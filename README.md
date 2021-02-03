@@ -10,7 +10,7 @@ Scripts for automation of routine tasks
 | awesomewal              |                        script for applying pywal colors to awesomewm themes                         |
 | dmenumount              |                   script for mounting new _dev_ into specific folder using dmenu                    |
 | dmenuunicode            |       script that lists unicode chars from the file in dmenu and copy chosen to the clipboard       |
-| docread                 | script that recursevily lists all pdf's from the given folders in dmenu and opens chosen in zathura |
+| docread                 | script that recursively lists all pdf's from the given folders in dmenu and opens chosen in zathura |
 | keyboardsetup           |                           script that sets given keyboard layouts for X11                           |
 | mansplain               |             same as docread but for man-pages (there is option to open random man-page)             |
 | mountlaptop             |                              script for mounting my laptop using sshd                               |
@@ -21,7 +21,7 @@ Scripts for automation of routine tasks
 | wallplaylist            |           script that sets random wallpaper from given folder every 30 minutes using feh            |
 | agenda + addagenda      |                                scripts for setting agenda for a day                                 |
 | calc                    |                                   just a calc with more features                                    |
-| checkecho               |                      script for checkng which ver of echo installed on system                       |
+| checkecho               |                    script for checking which version of echo installed on system                    |
 | convertatemp            |                                  script for converting temperature                                  |
 | dosdir                  |                                  DOS dir command emulation in UNIX                                  |
 | echon                   |                                           echo with a \n                                            |
@@ -38,9 +38,10 @@ Scripts for automation of routine tasks
 | scriptbc                |                                              better bc                                              |
 | showfile                |                     simple file viewer like less or more with some new features                     |
 | timein                  |                              script for showing time in certain place                               |
-| validdate               |                                      scipt for validating date                                      |
+| validdate               |                                     script for validating date                                      |
 | validfloate             |                                 script for validating float numbers                                 |
 | validint                |                                   script for validating integers                                    |
 | watermark               |              script for applying given watermark to a supplied image using imagemagick              |
 | xcount                  |                          script for counting executable files in a folder                           |
 | ebooksync               |                              script to sync books on my kindle and pc                               |
+| keeclip                 |                     script for clipping password or nickname from keepassxc db                      |
